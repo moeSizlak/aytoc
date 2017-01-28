@@ -1,8 +1,8 @@
 #ifndef _SEASON5_H
 #define _SEASON5_H
+#define CARDINALITY (11)
 #include "ayto.h"
 
-#define CARDINALITY (11)
 
 char* guys[CARDINALITY] = {"Andre","Derrick","Edward","Hayden","Jaylan","Joey","Michael","Mike","Osvaldo","Ozzy","Tyler"};
 char* girls[CARDINALITY] = {"Alicia","Carolina","Casandra","Gianna","Hannah","Kam","Kari","Kathryn","Shannon","Taylor","Tyranny"};
@@ -30,19 +30,17 @@ Truth_t t[3] = {
 Ceremony_t c[3] = {
 	{
 		.pairs = {
-
-			{ "Michael", "Hannah" },
-			{ "Mike", "Kari" },
-			{ "Osvaldo", "Tyranny" },
-			{ "Ozzy", "Gianna" },
-			{ "Tyler", "Taylor" },
-			
-						{ "Andre", "Alicia" },
+			{ "Andre", "Alicia" },
 			{ "Derrick", "Kathryn" },
 			{ "Edward", "Kam" },
 			{ "Hayden", "Shannon" },
 			{ "Jaylan", "Casandra" },
-			{ "Joey", "Carolina" }
+			{ "Joey", "Carolina" },
+			{ "Michael", "Hannah" },
+			{ "Mike", "Kari" },
+			{ "Osvaldo", "Tyranny" },
+			{ "Ozzy", "Gianna" },
+			{ "Tyler", "Taylor" }						
 		},
 		.lights = 2,
 		.episode = 1		

@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <locale.h>
 
-#define CARDINALITY (11)
 
 #define NO_MATCH (0)
 #define PERFECT_MATCH (1)
