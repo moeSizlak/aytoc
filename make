@@ -1,2 +1,2 @@
 #!/bin/sh
-gcc ayto.c -O3 -o ayto
+gcc -pthread ayto.c -O3 -o ayto
