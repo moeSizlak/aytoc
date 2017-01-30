@@ -499,7 +499,7 @@ int printResults(Ayto_t* a, Results_t* r) {
 	printf("%'d possibilities remain.\n\n", (int)total);
 	printf("%'" PRIu64 " == blackout numerator.\n\n", bon);
 	printf("%'" PRIu64 " == blackout denominator\n\n", bod);
-	printf("%.1f == blackout odds\n\n", ((double)bon)/((double)bod));
+	printf("%.5f == blackout odds\n\n", 100.0*((double)bon)/((double)bod));
 	
 	int w = 6;
 	int l;
