@@ -2,6 +2,7 @@
 #define _AYTO_H
 #include <stdint.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <locale.h>
 #include <inttypes.h>
@@ -318,7 +319,7 @@ void* getResultsT(void* args)
     int correct;
 	
 	int index2;
-	int i2, j2;
+	int i2, j2, x2;
 	int m2;
 	int valid2;
 	int correct2;
@@ -326,20 +327,12 @@ void* getResultsT(void* args)
 	uint8_t elements2[CARDINALITY];
 
  
-	uint64_t pWarn = (lastP-firstP)/10000;
-	if(pWarn == 0) {
-		pWarn = 1;
-	}
-	
     for(int p=firstP; p<=lastP; ++p ) {
 		m = p;
 		memcpy(elements, identityPermutation, sizeof elements);
 
-		/*if (threadIndex == 0 && (lastP - firstP) % pWarn == 0) {
-			printf("Progress: %3.3f percent\n", (100.0 * (p-firstP)) / (lastP-firstP+1));
-		}*/
-		if(threadIndex == 0) {
-			printf("p==%10d, firstP==%10d, lastP=%10d\n", (int)p, (int)firstP, (int)lastP);
+		if(threadIndex == 0 && (!(p&511))) {
+			printf("p==%10d, firstP==%10d, lastP=%10d, num=%'"PRIu64", den=%'"PRIu64"\n", (int)p, (int)firstP, (int)lastP, bo_numerator, bo_denominator);
 		}
 			
 		// Antoine Cormeau's algorithm
@@ -450,8 +443,17 @@ void* getResultsT(void* args)
 			
 			for(i2=0; i2<CARDINALITY; i2++) {
 				if(permuted2[i2] == permuted[i2]) {
-					valid2 = 0;
-					break;
+					x2 = 0;
+					for(j2=0; j2<matchesLength; j2++) {
+						if(leftMatches[j2] == i2) {
+							x2 = 1;
+							break;
+						}
+					}
+					if(x2 == 0) {
+						valid2 = 0;
+						break;
+					}
 				}
 			}
 		
@@ -495,8 +497,8 @@ int printResults(Ayto_t* a, Results_t* r) {
 	char d1[64] = "";
 	setlocale(LC_NUMERIC, "");
 	printf("%'d possibilities remain.\n\n", (int)total);
-	printf("%" PRIu64 " == blackout numerator.\n\n", bon);
-	printf("%" PRIu64 " == blackout denominator\n\n", bod);
+	printf("%'" PRIu64 " == blackout numerator.\n\n", bon);
+	printf("%'" PRIu64 " == blackout denominator\n\n", bod);
 	printf("%.1f == blackout odds\n\n", ((double)bon)/((double)bod));
 	
 	int w = 6;

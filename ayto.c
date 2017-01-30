@@ -6,7 +6,7 @@
 #include "season5.h"
 #include "ayto.h"
 
-#define NUMTHREADS (2)
+#define NUMTHREADS (8)
 
 #define EPISODE (-1)
 
