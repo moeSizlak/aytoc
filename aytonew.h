@@ -8,11 +8,46 @@
 #include <inttypes.h>
 #include <pthread.h>
 
+#define MASK(M) ((uint64_t)15 << ((M)<<2))
+#define SET_CEREMONY_MATCH(C, X, Y)  (C = ((C) & (~MASK(X))) | ((uint64_t)(Y) << ((X)*4)))
+#define SET_CEREMONY_LIGHTS(C, Y)    (C = ((C) & ((uint64_t)0x0fffffffffffffff)) | ((uint64_t)(Y) << 60))
+#define SET_CEREMONY_EPISODE(C, Y)   (C = ((C) & ((uint64_t)0xf0ffffffffffffff)) | ((uint64_t)(Y) << 56))
+#define GET_CEREMONY_MATCH(C, X)     ((uint8_t)(((C) & MASK(X)) >> ((X)*4)))
+#define GET_CEREMONY_LIGHTS(C)       ((uint8_t)((C) >> 60))
+#define GET_CEREMONY_EPISODE(C)      ((uint8_t)(((C) & ((uint64_t)0x0f00000000000000)) >> 56))
 
 #define NO_MATCH (0)
 #define PERFECT_MATCH (1)
 #define GUY (1)
 #define GIRL (2)
+
+int COUNT_CEREMONY_MATCHES(uint64_t A,uint64_t B) {
+	int c = 0;
+	uint64_t x = ~(A^B);
+	for(int i=0; i<CARDINALITY; i++) {
+		if(__builtin_popcountll(x & MASK(i)) == 4) {
+			c++;
+		}
+	}
+	return c;
+}
+
+int VERIFY_CEREMONY_MATCHES_COUNT(uint64_t A,uint64_t B) {
+	int c = 0;
+	uint64_t x = ~(A^B);
+	uint8_t l = GET_CEREMONY_LIGHTS(A);
+	
+	for(int i=0; i<CARDINALITY; i++) {
+		if(__builtin_popcountll(x & MASK(i)) == 4) {
+			c++;
+			if(c > l) {
+				return 0;
+			}
+		}
+	}
+	return (c == l);
+}
+
 
 typedef struct Pair {
 	char* guy;
@@ -23,6 +58,7 @@ typedef struct Ceremony {
 	Pair_t pairs[CARDINALITY];
 	uint8_t guys[CARDINALITY];
 	uint8_t girls[CARDINALITY];
+	uint64_t ceremony;
 	uint8_t lights;
 	double episode;
 } Ceremony_t;
@@ -63,7 +99,7 @@ typedef struct ThreadArg {
 } ThreadArg_t;
 
 
-int nameToInt(char* name, char** nameArray) {
+static int nameToInt(char* name, char** nameArray) {
 	for(int i = 0; i < CARDINALITY; i++) {
 		if(strcasecmp(nameArray[i], name) == 0) {
 			return i;
@@ -72,7 +108,7 @@ int nameToInt(char* name, char** nameArray) {
 	return -1;
 }
 
-void quickSortCeremony(uint8_t* x, uint8_t* a, Pair_t* b, int first, int last) {
+static void quickSortCeremony(uint8_t* x, uint8_t* a, Pair_t* b, int first, int last) {
 	int pivot,j,i;
 	uint8_t temp;
 	Pair_t ptemp;
@@ -182,7 +218,15 @@ int addCeremony(Ceremony_t* c, Ayto_t* a) {
 		printf("%s ", (*c).pairs[i].girl);
 	}
 	printf("\n\n");	
-****************************************** */
+********************************************* */
+
+	uint64_t x = 0;
+	SET_CEREMONY_EPISODE(x, (*c).episode);
+	SET_CEREMONY_LIGHTS(x, (*c).lights);
+	for (int i = 0; i < CARDINALITY; i++) {
+		SET_CEREMONY_MATCH(x, i, (*c).girls[i]);
+	}
+	(*c).ceremony = x;
 	
 	if((*a).numCeremonies < (CARDINALITY*2)) {
 		(*a).ceremonies[(*a).numCeremonies] = (*c);
@@ -252,7 +296,7 @@ void* getResultsT(void* args)
 	if(episode <= 0) {
 		episode = 999999;
 	}
-	
+
 	uint8_t leftMatches[CARDINALITY*2];
 	uint8_t rightMatches[CARDINALITY*2];
 	uint8_t matchesLength = 0;
@@ -292,25 +336,37 @@ void* getResultsT(void* args)
 	
 	uint8_t lights[CARDINALITY*2];
 	uint8_t ceremonies[CARDINALITY*2*CARDINALITY];
+	uint64_t ceremoniesR[CARDINALITY*2];
 	uint8_t ceremoniesLength = 0;
 	
 	for(int i=0; i < (*a).numCeremonies; i++) {
-		if((*a).ceremonies[i].episode <= episode) {
-			lights[ceremoniesLength] = (*a).ceremonies[i].lights;
-			for(int j = 0; j < CARDINALITY; j++) {
-				ceremonies[ceremoniesLength * CARDINALITY + j] = (*a).ceremonies[i].girls[j];
-			}			
+		///if((*a).ceremonies[i].episode <= episode) {
+
+		if(GET_CEREMONY_EPISODE((*a).ceremonies[i].ceremony) <= episode) {
+			///lights[ceremoniesLength] = (*a).ceremonies[i].lights;
+			lights[ceremoniesLength] = GET_CEREMONY_LIGHTS((*a).ceremonies[i].ceremony);
+			///for(int j = 0; j < CARDINALITY; j++) {
+			///	ceremonies[ceremoniesLength * CARDINALITY + j] = (*a).ceremonies[i].girls[j];
+			///}		
+			ceremoniesR[ceremoniesLength] = (*a).ceremonies[i].ceremony;
 			ceremoniesLength++;
 		}
 	}
 	
 	uint64_t fact = factorial(CARDINALITY);
+	
 	uint8_t permuted[CARDINALITY];
+	uint64_t permutedR = 0;
+	
 	uint8_t elements[CARDINALITY];
+	uint64_t elementsR = 0;
+	
 	uint8_t identityPermutation[CARDINALITY];
+	uint64_t identityPermutationR = 0;
 
 	for(int i =0; i<CARDINALITY; i++) {
-		identityPermutation[i] = i;
+		///identityPermutation[i] = i;
+		SET_CEREMONY_MATCH(identityPermutationR, i, i);
 	}
 	
 	
@@ -331,7 +387,8 @@ void* getResultsT(void* args)
  
     for(int p=firstP; p<=lastP; ++p ) {
 		m = p;
-		memcpy(elements, identityPermutation, sizeof elements);
+		///memcpy(elements, identityPermutation, sizeof elements);
+		elementsR = identityPermutationR;
 
 		//if(threadIndex == 0 && (!(p&511))) {
 		//	printf("p==%10d, firstP==%10d, lastP=%10d, num=%'"PRIu64", den=%'"PRIu64"\n", (int)p, (int)firstP, (int)lastP, bo_numerator, bo_denominator);
@@ -341,14 +398,17 @@ void* getResultsT(void* args)
 		for( i=0; i<CARDINALITY; ++i ) {
 			index = m % (CARDINALITY-i);
 			m = m / (CARDINALITY-i);
-			permuted[i] = elements[index];
-			elements[index] = elements[CARDINALITY-i-1];
+			///permuted[i] = elements[index];
+			SET_CEREMONY_MATCH(permutedR, i, GET_CEREMONY_MATCH(elementsR, index));
+			///elements[index] = elements[CARDINALITY-i-1];
+			SET_CEREMONY_MATCH(elementsR, index, GET_CEREMONY_MATCH(elementsR, CARDINALITY-i-1));
 		}
 
 		valid = 1;
 		
 		for(i = 0; i < matchesLength; i++) {
-			if(permuted[leftMatches[i]] != rightMatches[i]) {
+			///if(permuted[leftMatches[i]] != rightMatches[i]) {
+			if(GET_CEREMONY_MATCH(permutedR, leftMatches[i]) != rightMatches[i]) {
 				valid = 0;
 				break;
 			}
@@ -359,7 +419,8 @@ void* getResultsT(void* args)
 		}
 		
 		for(i = 0; i < nonmatchesLength; i++) {
-			if(permuted[leftNonmatches[i]] == rightNonmatches[i]) {
+			///if(permuted[leftNonmatches[i]] == rightNonmatches[i]) {
+			if(GET_CEREMONY_MATCH(permutedR, leftNonmatches[i]) == rightNonmatches[i]) {
 				valid = 0;
 				break;
 			}
@@ -370,14 +431,15 @@ void* getResultsT(void* args)
 		}
 		
 		for(i = 0; i < ceremoniesLength; i++) {
-			correct = 0;
-			for(j = 0; j < CARDINALITY; j++) {
-				if(permuted[j] == ceremonies[i * CARDINALITY + j]) {
-					correct += 1;
-				}
-			}
+			///correct = 0;
+			///for(j = 0; j < CARDINALITY; j++) {
+			///	if(permuted[j] == ceremonies[i * CARDINALITY + j]) {
+			///		correct += 1;
+			///	}
+			///}
 			
-			if(correct != lights[i]) {
+			///if(correct != lights[i]) {
+			if(!VERIFY_CEREMONY_MATCHES_COUNT(ceremoniesR[i], permutedR)) {
 				valid = 0;
 				break;
 			}
@@ -393,10 +455,6 @@ void* getResultsT(void* args)
 		for(int p2=0; calculateBlackoutOdds && p2<fact; ++p2 ) {
 			m2 = p2;
 			memcpy(elements2, identityPermutation, sizeof elements2);
-
-			//if (p % (10*9*8*7*6*4*3*1) == 0) {
-			//	printf("Progress: %3.0f percent\n", (100.0 * p) / fact);
-			//}
 				
 			// Antoine Cormeau's algorithm
 			for( i2=0; i2<CARDINALITY; ++i2 ) {
@@ -469,7 +527,8 @@ void* getResultsT(void* args)
 		
 		//=================================================================
 		for( i=0; i<CARDINALITY; ++i ) {
-			counts[i * CARDINALITY + permuted[i]]++;
+			///counts[i * CARDINALITY + permuted[i]]++;
+			counts[i * CARDINALITY + GET_CEREMONY_MATCH(permutedR, i)]++;
 		}
 	}
 
@@ -499,12 +558,9 @@ int printResults(Ayto_t* a, Results_t* r) {
 	char d1[64] = "";
 	setlocale(LC_NUMERIC, "");
 	printf("%'d possibilities remain.\n", (int)total);
-	if(bod) {
-		printf("%'" PRIu64 " == blackout numerator.\n", bon);
-		printf("%'" PRIu64 " == blackout denominator\n", bod);
-		printf("%.5f == blackout odds\n", 100.0*((double)bon)/((double)bod));
-	}
-	printf("\n");
+	printf("%'" PRIu64 " == blackout numerator.\n", bon);
+	printf("%'" PRIu64 " == blackout denominator\n", bod);
+	printf("%.5f == blackout odds\n\n", 100.0*((double)bon)/((double)bod));
 	
 	int w = 6;
 	int l;

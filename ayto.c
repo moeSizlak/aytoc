@@ -4,7 +4,6 @@
 #include <time.h>
 #include <pthread.h>
 #include "season5.h"
-#include "ayto.h"
 
 #define NUMTHREADS (8)
 
@@ -55,6 +54,7 @@ int main(int argc, char** argv) {
 		threadArgs[g].lock = &lock;
 		threadArgs[g].firstP = next;
 		threadArgs[g].lastP = (next + chunk - 1) + (g < remainder ? 1 : 0);
+		threadArgs[g].calculateBlackoutOdds = 0;
 		next = threadArgs[g].lastP + 1;		
 	}
 	

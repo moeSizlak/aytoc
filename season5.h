@@ -9,25 +9,25 @@ char* girls[CARDINALITY] = {"Alicia","Carolina","Casandra","Gianna","Hannah","Ka
 
 int numEpisodes = 3;
 
-Truth_t t[3] = {
+Truth_t t[] = {
 	{
 		.pair = {"Hayden","Gianna"},
 		.truth = NO_MATCH,
-		.episode = 1	
+		.episode = 0.5	
 	},
 	{
 		.pair = {"Andre","Alicia"},
 		.truth = NO_MATCH,
-		.episode = 2	
+		.episode = 1.5	
 	},
 	{
 		.pair = {"Ozzy","Carolina"},
 		.truth = NO_MATCH,
-		.episode = 3	
+		.episode = 2.5	
 	}
 };
 	
-Ceremony_t c[3] = {
+Ceremony_t c[] = {
 	{
 		.pairs = {
 			{ "Andre", "Alicia" },
