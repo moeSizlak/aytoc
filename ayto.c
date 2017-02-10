@@ -21,17 +21,19 @@ int main(int argc, char** argv) {
 	
 	start = clock();
 	
-	int j;	
-	for(int i = 0; i < numEpisodes; i++) {
-		j = addCeremony(&c[i], &a);
-		if(j != 0) {
-			printf("Failed to add ceremony[%d](%d)\n", i, j);
+	int j;
+	for (int i = 0; i < numTruths; i++) {
+		j = addTruth(&t[i], &a);
+		if (j != 0) {
+			printf("Failed to add truth[%d](%d)\n", i, j);
 			return -1;
 		}
-		
-		j = addTruth(&t[i], &a);
-		if(j != 0) {
-			printf("Failed to add truth[%d](%d)\n", i, j);
+	}
+
+	for (int i = 0; i < numCeremonies; i++) {
+		j = addCeremony(&c[i], &a);
+		if (j != 0) {
+			printf("Failed to add ceremony[%d](%d)\n", i, j);
 			return -1;
 		}
 	}
