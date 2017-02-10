@@ -10,6 +10,7 @@
 #define EPISODE (-1)
 
 
+
 int main(int argc, char** argv) {
 	
 	pthread_t thread[NUMTHREADS];
