@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 		threadArgs[g].lock = &lock;
 		threadArgs[g].firstP = next;
 		threadArgs[g].lastP = (next + chunk - 1) + (g < remainder ? 1 : 0);
-		threadArgs[g].calculateBlackoutOdds = 0;
+		threadArgs[g].calculateBlackoutOdds = 1;
 		next = threadArgs[g].lastP + 1;		
 	}
 	

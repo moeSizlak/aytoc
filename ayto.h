@@ -333,9 +333,9 @@ void* getResultsT(void* args)
 		m = p;
 		memcpy(elements, identityPermutation, sizeof elements);
 
-		//if(threadIndex == 0 && (!(p&511))) {
-		//	printf("p==%10d, firstP==%10d, lastP=%10d, num=%'"PRIu64", den=%'"PRIu64"\n", (int)p, (int)firstP, (int)lastP, bo_numerator, bo_denominator);
-		//}
+		if(threadIndex == 0 && (!(p&511))) {
+			printf("p==%10d, firstP==%10d, lastP=%10d, num=%'"PRIu64", den=%'"PRIu64"\n", (int)p, (int)firstP, (int)lastP, bo_numerator, bo_denominator);
+		}
 			
 		// Antoine Cormeau's algorithm
 		for( i=0; i<CARDINALITY; ++i ) {
