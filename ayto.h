@@ -40,6 +40,8 @@ typedef struct Results {
 	uint64_t results[CARDINALITY][CARDINALITY];
 	uint64_t bo_numerator;
 	uint64_t bo_denominator;
+	uint64_t boa_numerator;
+	uint64_t boa_denominator;
 } Results_t;
 
 typedef struct Ayto {
@@ -248,6 +250,9 @@ void* getResultsT(void* args)
 	
 	uint64_t bo_numerator = 0;
 	uint64_t bo_denominator = 0;
+	uint64_t boa_numerator = 0;
+	uint64_t boa_denominator = 0;
+	int isActual2;
 	
 	if(episode <= 0) {
 		episode = 999999;
@@ -407,6 +412,7 @@ void* getResultsT(void* args)
 			}
 
 			valid2 = 1;
+			isActual2 = 1;
 			
 			for(i2 = 0; i2 < matchesLength; i2++) {
 				if(permuted2[leftMatches[i2]] != rightMatches[i2]) {
@@ -441,7 +447,26 @@ void* getResultsT(void* args)
 				continue;
 			}
 			
-			bo_denominator++;
+			bo_denominator++;	
+			
+			for(i2 = 0; i2 < ceremoniesLength; i2++) {
+				correct = 0;
+				for(j2 = 0; j2 < CARDINALITY; j2++) {
+					if(permuted2[j2] == ceremonies[i2 * CARDINALITY + j2]) {
+						correct += 1;
+					}
+				}
+				
+				if(correct != lights[i2]) {
+					isActual2 = 0;
+					break;
+				}
+			}
+			
+			
+			if(isActual2) {
+				boa_denominator++;
+			}
 			
 			for(i2=0; i2<CARDINALITY; i2++) {
 				if(permuted2[i2] == permuted[i2]) {
@@ -464,6 +489,9 @@ void* getResultsT(void* args)
 			}
 			
 			bo_numerator++;
+			if(isActual2) {
+				boa_numerator++;
+			}
 		}
 		
 		
@@ -477,6 +505,8 @@ void* getResultsT(void* args)
 	(*r).total += total;
 	(*r).bo_numerator += bo_numerator;
 	(*r).bo_denominator += bo_denominator;
+	(*r).boa_numerator += boa_numerator;
+	(*r).boa_denominator += boa_denominator;
 	
 	for( int x = 0; x < CARDINALITY; x++ ) {
 		for( int y = 0; y < CARDINALITY; y++ ) {
@@ -492,6 +522,8 @@ int printResults(Ayto_t* a, Results_t* r) {
 	uint64_t total = (*r).total;
 	uint64_t bon = (*r).bo_numerator;
 	uint64_t bod = (*r).bo_denominator;
+	uint64_t boan = (*r).boa_numerator;
+	uint64_t boad = (*r).boa_denominator;
 	
 	char x1[64] = "%";
 	char x2[64] = "%";
@@ -500,9 +532,13 @@ int printResults(Ayto_t* a, Results_t* r) {
 	setlocale(LC_NUMERIC, "");
 	printf("%'d possibilities remain.\n", (int)total);
 	if(bod) {
-		printf("%'" PRIu64 " == blackout numerator.\n", bon);
-		printf("%'" PRIu64 " == blackout denominator\n", bod);
-		printf("%.5f == blackout odds\n", 100.0*((double)bon)/((double)bod));
+		printf("%'" PRIu64 " == blackout perceived numerator.\n", bon);
+		printf("%'" PRIu64 " == blackout perceived denominator\n", bod);
+		printf("%.5f == blackout perceived odds\n", 100.0*((double)bon)/((double)bod));
+		
+		printf("%'" PRIu64 " == blackout actual numerator.\n", boan);
+		printf("%'" PRIu64 " == blackout actual denominator\n", boad);
+		printf("%.5f == blackout actual odds\n", 100.0*((double)boan)/((double)boad));
 	}
 	printf("\n");
 	

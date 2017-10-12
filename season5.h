@@ -7,8 +7,8 @@
 char* guys[CARDINALITY] = {"Andre","Derrick","Edward","Hayden","Jaylan","Joey","Michael","Mike","Osvaldo","Ozzy","Tyler"};
 char* girls[CARDINALITY] = {"Alicia","Carolina","Casandra","Gianna","Hannah","Kam","Kari","Kathryn","Shannon","Taylor","Tyranny"};
 
-int numTruths = 5;
-int numCeremonies = 5;
+int numTruths = 7;
+int numCeremonies = 7;
 
 Truth_t t[] = {
 	{
@@ -35,6 +35,16 @@ Truth_t t[] = {
 		.pair = { "Edward","Kam" },
 		.truth = PERFECT_MATCH,
 		.episode = 4.5
+	},
+	{
+		.pair = { "Ozzy","Hannah" },
+		.truth = NO_MATCH,
+		.episode = 5.5
+	},
+	{
+		.pair = { "Andre","Taylor" },
+		.truth = NO_MATCH,
+		.episode = 6.5
 	}
 };
 	
@@ -126,6 +136,42 @@ Ceremony_t c[] = {
 
 .lights = 4,
 .episode = 5
+	},
+	{
+		.pairs = {
+			{ "Andre","Taylor" },
+			{ "Derrick","Tyranny" },
+			{ "Edward","Kam" },
+			{ "Hayden","Carolina" },
+			{ "Ozzy","Casandra" },
+			{ "Joey","Kathryn" },
+			{ "Michael","Kari" },
+			{ "Mike","Alicia" },
+			{ "Osvaldo","Gianna" },
+			{ "Jaylan","Hannah" },
+			{ "Tyler","Shannon" }
+},
+
+.lights = 4,
+.episode = 6
+	},
+	{
+		.pairs = {
+			{ "Andre","Casandra" },
+			{ "Derrick","Kari" },
+			{ "Edward","Kam" },
+			{ "Hayden","Carolina" },
+			{ "Ozzy","Alicia" },
+			{ "Joey","Kathryn" },
+			{ "Michael","Hannah" },
+			{ "Mike","Gianna" },
+			{ "Osvaldo","Taylor" },
+			{ "Jaylan","Tyranny" },
+			{ "Tyler","Shannon" }
+},
+
+.lights = 4,
+.episode = 7
 	}
 };
 
